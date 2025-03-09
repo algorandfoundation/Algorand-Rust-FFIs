@@ -5,6 +5,8 @@
   "files": [
     "dist/**/*"
   ],
+  "main": "./dist/algo_models.wasm2js.mjs",
+  "module": "./dist/algo_models.wasm2js.mjs",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
