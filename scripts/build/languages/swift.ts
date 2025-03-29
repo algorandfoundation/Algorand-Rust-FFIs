@@ -20,26 +20,26 @@ export async function buildSwift(crate: string) {
   await run(cargoBuildCmd);
 
   await run(
-    `cargo --color always run -p uniffi-bindgen generate --no-format --library target/aarch64-apple-darwin/debug/lib${crate}_ffi.dylib --language swift --out-dir target/debug/swift/${crate}`,
+    `cargo --color always run -p uniffi-bindgen generate --no-format --library target/aarch64-apple-darwin/debug/lib${crate}_ffi.a --language swift --out-dir target/debug/swift/${crate}`,
   );
 
   let createXcfCmd = "xcodebuild -create-xcframework";
   targets.forEach((target) => {
-    createXcfCmd += ` -library target/${target}/debug/lib${crate}_ffi.dylib -headers target/debug/swift/${crate}/`;
+    createXcfCmd += ` -library target/${target}/debug/lib${crate}_ffi.a -headers target/debug/swift/${crate}/`;
   });
 
   await Promise.all(
     Object.keys(fatTargets).map(async (fatTargetName) => {
       const libPaths: string[] = [];
       fatTargets[fatTargetName].forEach((target) => {
-        libPaths.push(`target/${target}/debug/lib${crate}_ffi.dylib`);
+        libPaths.push(`target/${target}/debug/lib${crate}_ffi.a`);
       });
 
       await run(
-        `lipo -create ${libPaths.join(" ")} -output target/debug/lib${crate}_ffi-${fatTargetName}.dylib`,
+        `lipo -create ${libPaths.join(" ")} -output target/debug/lib${crate}_ffi-${fatTargetName}.a`,
       );
 
-      createXcfCmd += ` -library target/debug/lib${crate}_ffi-${fatTargetName}.dylib -headers target/debug/swift/${crate}/`;
+      createXcfCmd += ` -library target/debug/lib${crate}_ffi-${fatTargetName}.a -headers target/debug/swift/${crate}/`;
     }),
   );
 
