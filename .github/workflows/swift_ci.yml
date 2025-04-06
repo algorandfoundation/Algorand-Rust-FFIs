@@ -17,6 +17,7 @@ permissions:
 env:
   CRATE: algo_models
   PACKAGE: AlgoModels
+  IOS_BUILD: iOS_22D8075
 
 jobs:
   build_and_test:
@@ -39,7 +40,14 @@ jobs:
           swift: ^6
           action: none
           platform: macOS
+      - name: Cache iOS Simulator
+        id: cache-ios-simulator
+        uses: actions/cache@v3
+        with:
+          path: /Library/Developer/CoreSimulator/Volumes/${{ env.IOS_BUILD }}
+          key: ${{ env.IOS_BUILD }}-simulator
       - name: Install iOS Simulator
+        if: steps.cache-ios-simulator.outputs.cache-hit != 'true'
         run: xcodebuild -downloadPlatform iOS 
       - name: Build
         run: bun scripts/build ${{ env.CRATE }} swift
